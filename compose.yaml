@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres:17'
+    environment:
+      - 'POSTGRES_DB=${SPRING_DATASOURCE_DATABASE}'
+      - 'POSTGRES_PASSWORD=${SPRING_DATASOURCE_PASSWORD}'
+      - 'POSTGRES_USER=${SPRING_DATASOURCE_USERNAME}'
+    ports:
+      - '5432:5432'
