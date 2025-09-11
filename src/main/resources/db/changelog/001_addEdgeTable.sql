@@ -4,5 +4,5 @@
 CREATE TABLE edge (
     from_id integer,
     to_id integer,
-    UNIQUE (from_id, to_id)
+    PRIMARY KEY(from_id, to_id)
 );
