@@ -12,6 +12,31 @@ Copy the .env.template to .env
 
 You change in this file sensitive settings, such as usernames or passwords.
 
+Build the application with 
+
+    mvn clean install
+
+This builds the application and runs the tests. If the tests fail, see chapter [Troubleshooting](#troubleshooting).
+
+## Running the application
+
+To run the application start the containers
+
+    docker compose up -d
+
+## Troubleshooting
+
+If you run docker on colima on Mac OSX and apple silicon, please be aware that testcontainers
+may not work with virtiofs, thus you have to change to sshfs.
+
+    colima start --edit
+
+If the containers are still not running you may have to set some environment variables.
+
+    export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+    export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
+    export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+
 # My Approach
 
 I started with analyzing the task at hand and enumerated the most important
