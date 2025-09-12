@@ -20,4 +20,11 @@ class EdgeService(private val dsl: DSLContext) {
             .onConflictDoNothing()
             .execute()
 
+    fun deleteEdge(edge: EdgeDTO): Int {
+        return dsl.deleteFrom(EDGE)
+            .where(EDGE.FROM_ID.eq(edge.from))
+            .and(EDGE.TO_ID.eq(edge.to))
+            .execute()
+    }
+
 }

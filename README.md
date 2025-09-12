@@ -74,9 +74,15 @@ to add one new thing, I want to learn.
 After generating the code and successfully executing the generated hello world I wrote the user stories
 in github issues and prioritized them.
 
-# Architectural considerations
+## Architectural considerations
 
 JOOQ is a very performant and well known database access library. Postgres is also very performant for that
 task. I know both very well, so the task was predestined for recursive queries within postgres which should
 result in a very thin domain layer.
 The hardest part was to avoid infinite queries because of possible cycles.
+
+## REST responses
+
+I chose the Response Codes according to this book:
+
+[RESTful Web Services Cookbook](https://books.google.at/books?id=LDuzpQlVuG4C&printsec=frontcover&hl=de#v=onepage&q&f=false)

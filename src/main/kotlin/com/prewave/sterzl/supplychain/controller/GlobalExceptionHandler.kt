@@ -16,7 +16,12 @@ class GlobalExceptionHandler {
     )
 
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(EdgeExistsException::class)
-    fun handleException(ex: EdgeExistsException): ErrorResponse =
+    @ExceptionHandler(EdgeExistsExceptions::class)
+    fun handleException(ex: EdgeExistsExceptions): ErrorResponse =
+        ErrorResponse(ex.edge, ex.message ?: "Unknown error")
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EdgeNotFoundException::class)
+    fun handleException(ex: EdgeNotFoundException): ErrorResponse =
         ErrorResponse(ex.edge, ex.message ?: "Unknown error")
 }
