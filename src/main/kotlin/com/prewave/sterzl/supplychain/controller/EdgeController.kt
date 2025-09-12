@@ -3,12 +3,7 @@ package com.prewave.sterzl.supplychain.controller
 import com.prewave.sterzl.supplychain.model.EdgeDTO
 import com.prewave.sterzl.supplychain.service.EdgeService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/")
@@ -32,5 +27,13 @@ class EdgeController {
         if (affectedRows == 0) {
             throw EdgeNotFoundException(edge)
         }
+    }
+
+    @GetMapping
+    fun getTree(@RequestParam("from") from: Int): List<EdgeDTO?> {
+        if (edgeService.existsNode(from)) {
+            return edgeService.getTree(from)
+        }
+        throw NodeNotFoundException(from)
     }
 }
