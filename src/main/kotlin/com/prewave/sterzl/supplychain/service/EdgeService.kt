@@ -7,6 +7,7 @@ import org.jooq.impl.DSL.*
 import org.jooq.impl.SQLDataType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.stream.Stream
 
 @Service
 @Transactional
@@ -40,7 +41,7 @@ class EdgeService(private val dsl: DSLContext) {
         return count > 0
     }
 
-    fun getTree(from: Int): List<EdgeDTO?> {
+    fun getTree(from: Int): Stream<EdgeDTO?> {
         fun createNodeField(name: String) = field(name, SQLDataType.INTEGER.nullable(false))
 
         val subEdgeName = name("subedges")
@@ -62,7 +63,8 @@ class EdgeService(private val dsl: DSLContext) {
         return dsl.withRecursive(recursiveCTE)
             .select(subEdgesFromId, subEdgesToId)
             .from(subEdgeName)
-            .fetch {
+            .fetchStream()
+            .map {
                 EdgeDTO(it.getValue(subEdgesFromId), it.getValue(subEdgesToId))
             }
     }

@@ -79,10 +79,17 @@ in github issues and prioritized them.
 JOOQ is a very performant and well known database access library. Postgres is also very performant for that
 task. I know both very well, so the task was predestined for recursive queries within postgres which should
 result in a very thin domain layer.
-The hardest part was to avoid infinite queries because of possible cycles.
+The hardest part I thought will be to avoid infinite queries because of possible cycles.
+But actually the hardest part was to get the json output of a tree to the client in a performant way.
 
-## REST responses
+## References
+
+### REST responses
 
 I chose the Response Codes according to this book:
 
 [RESTful Web Services Cookbook](https://books.google.at/books?id=LDuzpQlVuG4C&printsec=frontcover&hl=de#v=onepage&q&f=false)
+
+### Streaming JSON Output
+
+On how to stream json output I read [Blogentry](https://alexanderobregon.substack.com/p/streaming-json-output-in-spring-boot)
