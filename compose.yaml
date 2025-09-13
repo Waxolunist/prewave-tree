@@ -7,3 +7,23 @@ services:
       - 'POSTGRES_USER=${SPRING_DATASOURCE_USERNAME}'
     ports:
       - '5432:5432'
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U ${SPRING_DATASOURCE_USERNAME} -d ${SPRING_DATASOURCE_DATABASE}' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  supplychain:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - 'SPRING_DATASOURCE_DATABASE=${SPRING_DATASOURCE_DATABASE}'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${SPRING_DATASOURCE_DATABASE}'
+      - 'SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}'
+      - 'SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}'
+    ports:
+      - '8080:8080'

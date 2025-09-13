@@ -2,15 +2,33 @@
 
 ## Prerequisits
 
-- JDK21
+### Required
 
-## Start
+- JDK21
+- Docker
+- Docker compose
+
+### Optional
+
+- GraalVM JDK21
+
+## Running the application
 
 Copy the .env.template to .env
 
     cp env.template .env
 
-You change in this file sensitive settings, such as usernames or passwords.
+To run the application start the containers
+
+    docker compose up -d
+
+## Start Development
+
+Copy the .env.template to .env (if you haven't done so already)
+
+    cp env.template .env
+
+Change sensitive settings if you want, such as usernames or passwords.
 
 Build the application with 
 
@@ -18,16 +36,38 @@ Build the application with
 
 This builds the application and runs the tests. If the tests fail, see chapter [Troubleshooting](#troubleshooting).
 
-## Running the application
+## Building the GraalVM image
 
-To run the application start the containers
+1. First compile the spring image with the native profile:
 
-    docker compose up -d
+```
+mvn -Pnative spring-boot:build-image
+```
+
+2. Then run the application with graalvm and let the agent generate
+the hint files.
+
+```
+/Library/Java/JavaVirtualMachines/graalvm-21.jdk/Contents/Home/bin/java -Dspring.aot.enabled=true \
+        -agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image \
+        -jar target/supplychain-0.0.1-SNAPSHOT.jar
+```
+
+3. Test the application.
+
+4. Compile it to a graalvm native image
+
+```
+mvn -Dmaven.test.skip=true -Djooq.codegen.skip=true -Dkover.skip=true -Pnative native:compile
+```
 
 ## Troubleshooting
 
 If you run docker on colima on Mac OSX and apple silicon, please be aware that testcontainers
 may not work with virtiofs, thus you have to change to sshfs.
+Also you should have enough memory allocated to your docker host for the graalvm
+image compilation.
+I recommend at least 12G memory.
 
     colima start --edit
 
@@ -66,8 +106,9 @@ Furthermore I added the following dependencies:
 - PostgreSQL Driver
 - Spring Boot Actuator 
 - Testcontainers
+- Liquibase
 
-I decided early on to go with GraalVM for the runtime, because I heard good things about
+I decided early on to go with GraalVM native images for the runtime, because I heard good things about
 it regarding performance, and when taking on a task like this, I like
 to add one new thing, I want to learn.
 
@@ -76,11 +117,27 @@ in github issues and prioritized them.
 
 ## Architectural considerations
 
+### Database and Business Layer
+
 JOOQ is a very performant and well known database access library. Postgres is also very performant for that
 task. I know both very well, so the task was predestined for recursive queries within postgres which should
-result in a very thin domain layer.
+result in a very thin domain layer and high performance.
+
+The generated JOOQ files are versioned alongside with the source code,
+because of runtime conflicts. This results in a conflict. The application has to run 
+in order to generate the tables in the database, but the application can't compile without 
+a running and populated database.
+
+In the long run, I would separate the liquibase task from the application and also 
+not generate the JOOQ code with the default build. This will accelerate build times
+on the one hand and also increases security by removing parts of the application not 
+needed during runtime.
+
+### Testing and Linting
+
+
+
 The hardest part I thought will be to avoid infinite queries because of possible cycles.
-But actually the hardest part was to get the json output of a tree to the client in a performant way.
 
 ## References
 
@@ -93,3 +150,8 @@ I chose the Response Codes according to this book:
 ### Streaming JSON Output
 
 On how to stream json output I read [Blogentry](https://alexanderobregon.substack.com/p/streaming-json-output-in-spring-boot)
+
+### Building the graalvm image
+
+- [GraalVM Getting started](https://www.graalvm.org/jdk21/docs/getting-started/)
+- [Minimal docker images](https://aws.amazon.com/blogs/opensource/using-graalvm-build-minimal-docker-images-java-applications/)

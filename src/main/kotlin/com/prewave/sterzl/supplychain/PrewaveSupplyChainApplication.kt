@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class PrewaveSupplyChainApplication
 
 fun main(args: Array<String>) {
-	runApplication<PrewaveSupplyChainApplication>(*args)
+    runApplication<PrewaveSupplyChainApplication>(*args)
 }
