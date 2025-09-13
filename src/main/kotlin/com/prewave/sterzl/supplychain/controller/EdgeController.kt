@@ -2,10 +2,13 @@ package com.prewave.sterzl.supplychain.controller
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.prewave.sterzl.supplychain.model.BranchDTO
 import com.prewave.sterzl.supplychain.model.EdgeDTO
 import com.prewave.sterzl.supplychain.service.EdgeService
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import kotlin.streams.asSequence
@@ -47,7 +50,7 @@ class EdgeController {
     @GetMapping
     fun getTree(
         @RequestParam("from") from: Int,
-    ): List<EdgeDTO?> {
+    ): List<BranchDTO?> {
         if (edgeService.existsNode(from)) {
             return edgeService.getTree(from).toList()
         }
@@ -62,23 +65,28 @@ class EdgeController {
     @GetMapping("/stream")
     fun getTreeStream(
         @RequestParam("from") from: Int,
-    ): StreamingResponseBody {
+    ): ResponseEntity<StreamingResponseBody> {
         if (edgeService.existsNode(from)) {
-            return StreamingResponseBody { outputStream ->
-                jsonFactory.createGenerator(outputStream).use {
-                    it.codec = objectMapper
-                    it.writeStartArray()
+            val stream =
+                StreamingResponseBody { outputStream ->
+                    jsonFactory.createGenerator(outputStream).use {
+                        it.codec = objectMapper
+                        it.writeStartArray()
 
-                    edgeService.getTree(from).asSequence().withIndex().forEach { (idx, edge) ->
-                        it.writeObject(edge)
-                        if (idx % 100 == 0) {
-                            it.flush()
+                        edgeService.getTree(from).asSequence().withIndex().forEach { (idx, edge) ->
+                            it.writeObject(edge)
+                            if (idx % 100 == 0) {
+                                it.flush()
+                            }
                         }
-                    }
 
-                    it.writeEndArray()
+                        it.writeEndArray()
+                    }
                 }
-            }
+            return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(stream)
         }
         throw NodeNotFoundException(from)
     }

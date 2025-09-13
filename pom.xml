@@ -258,11 +258,16 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <filters>
+                        <excludes>
+                            <classes>com.prewave.sterzl.supplychain.generated.*</classes>
+                        </excludes>
+                    </filters>
                     <rules>
                         <rule>
                             <bounds>
                                 <bound>
-                                    <minValue>19</minValue>
+                                    <minValue>80</minValue>
                                 </bound>
                             </bounds>
                         </rule>

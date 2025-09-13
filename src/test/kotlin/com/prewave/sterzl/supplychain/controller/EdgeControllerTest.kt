@@ -3,6 +3,7 @@ package com.prewave.sterzl.supplychain.controller
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.prewave.sterzl.supplychain.MockitoHelper.anyObject
+import com.prewave.sterzl.supplychain.model.BranchDTO
 import com.prewave.sterzl.supplychain.model.EdgeDTO
 import com.prewave.sterzl.supplychain.service.EdgeService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -70,7 +71,7 @@ class EdgeControllerTest {
     fun deleteEdge() {
         `when`(edgeService.deleteEdge(anyObject())).thenReturn(1)
         val edge = EdgeDTO(1, 2)
-        val result = edgeController.deleteEdge(edge)
+        edgeController.deleteEdge(edge)
         verify(edgeService).deleteEdge(edge)
     }
 
@@ -89,7 +90,7 @@ class EdgeControllerTest {
 
     @Test
     fun getTree() {
-        val edgeList = listOf(EdgeDTO(1, 2), EdgeDTO(2, 3))
+        val edgeList = listOf(BranchDTO(1, arrayOf(2)), BranchDTO(2, arrayOf(3)))
         `when`(edgeService.getTree(anyInt())).thenReturn(edgeList.stream())
         `when`(edgeService.existsNode(anyInt())).thenReturn(true)
         val result = edgeController.getTree(1)
@@ -111,12 +112,12 @@ class EdgeControllerTest {
 
     @Test
     fun getTreeStream() {
-        val edgeList = listOf(EdgeDTO(1, 2), EdgeDTO(2, 3))
+        val edgeList = listOf(BranchDTO(1, arrayOf(2)), BranchDTO(2, arrayOf(3)))
         `when`(edgeService.getTree(anyInt())).thenReturn(edgeList.stream())
         `when`(edgeService.existsNode(anyInt())).thenReturn(true)
-        var result = edgeController.getTreeStream(1)
+        val result = edgeController.getTreeStream(1)
         // write to mocked stream
-        result.writeTo(outputStream)
+        result.body?.writeTo(outputStream)
         verify(edgeService).getTree(1)
     }
 

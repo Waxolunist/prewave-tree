@@ -1,6 +1,7 @@
 package com.prewave.sterzl.supplychain.service
 
 import com.prewave.sterzl.supplychain.generated.jooq.tables.references.EDGE
+import com.prewave.sterzl.supplychain.model.BranchDTO
 import com.prewave.sterzl.supplychain.model.EdgeDTO
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.*
@@ -45,12 +46,13 @@ class EdgeService(
         return count > 0
     }
 
-    fun getTree(from: Int): Stream<EdgeDTO> {
+    fun getTree(from: Int): Stream<BranchDTO> {
         fun createNodeField(name: String) = field(name, SQLDataType.INTEGER.nullable(false))
 
         val subEdgeName = name("subedges")
         val subEdgesFromId = createNodeField("from_id")
         val subEdgesToId = createNodeField("to_id")
+
         val recursiveCTE =
             subEdgeName
                 .`as`(
@@ -64,14 +66,15 @@ class EdgeService(
                                 .on(createNodeField("s.to_id").eq(createNodeField("e2.from_id"))),
                         ),
                 )
-
+        val arrayAggField = arrayAgg(subEdgesToId)
         return dsl
             .withRecursive(recursiveCTE)
-            .select(subEdgesFromId, subEdgesToId)
+            .select(subEdgesFromId, arrayAggField)
             .from(subEdgeName)
+            .groupBy(subEdgesFromId)
             .fetchStream()
             .map {
-                EdgeDTO(it.getValue(subEdgesFromId), it.getValue(subEdgesToId))
+                BranchDTO(it.getValue(subEdgesFromId), it.getValue(arrayAggField))
             }
     }
 }
