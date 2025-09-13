@@ -13,22 +13,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>Prewave Supply-Chain</name>
     <description>Interview Development Task</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <properties>
         <java.version>21</java.version>
         <kotlin.version>2.2.20</kotlin.version>
+        <jooq.skip>true</jooq.skip>
     </properties>
     <dependencies>
         <dependency>
@@ -152,6 +140,7 @@
                 </executions>
 
                 <configuration>
+                    <skip>${jooq.skip}</skip>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
                         <url>${SPRING_DATASOURCE_URL}</url>
@@ -277,4 +266,12 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>jooq</id>
+            <properties>
+                <jooq.skip>false</jooq.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

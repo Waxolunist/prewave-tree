@@ -12,23 +12,31 @@
 
 - GraalVM JDK21
 
-## Running the application
+## Preparation
 
 Copy the .env.template to .env
 
     cp env.template .env
 
+Change sensitive settings if you want, such as usernames or passwords.
+
+## Running the application with docker
+
 To run the application start the containers
 
     docker compose up -d
 
+## Running the application on the host
+
+To run the application start the database
+
+    docker compose up -d postgres
+
+Then you can start the application
+
+    mvn spring-boot:run
+
 ## Start Development
-
-Copy the .env.template to .env (if you haven't done so already)
-
-    cp env.template .env
-
-Change sensitive settings if you want, such as usernames or passwords.
 
 Build the application with 
 
@@ -36,7 +44,13 @@ Build the application with
 
 This builds the application and runs the tests. If the tests fail, see chapter [Troubleshooting](#troubleshooting).
 
-## Building the GraalVM image
+## Generating the JOOQ Code
+
+By default the JOOQ code generation is disabled. To enable it, enable the jooq profile.
+
+    mvn -Pjooq clean install
+
+## Building the GraalVM image and GrallVM metadata
 
 1. First compile the spring image with the native profile:
 
@@ -133,15 +147,70 @@ not generate the JOOQ code with the default build. This will accelerate build ti
 on the one hand and also increases security by removing parts of the application not 
 needed during runtime.
 
-### Testing and Linting
+### Controller design
 
-TODO 
+The controller contains 2 different approaches to the response schema.
+One is a standard approach, which is in trees with over a million edges 
+slightly faster, the other is a streaming approch, which is faster in 
+the time to the first byte.
 
-The hardest part I thought will be to avoid infinite queries because of possible cycles.
+You can measure the times with these commands:
 
-### Response and request formats
+    $ curl -o /dev/null -s -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' --location 'http://localhost:8080?from=800000'       
 
-TODO swagger docs
+    $ curl -o /dev/null -s -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' --location 'http://localhost:8080/stream?from=800000'
+
+### Response design decisions
+
+The response format is a list of Nodes. Each entry then contains a list of targets.
+
+```
+[
+    {
+        "from": 8000135,
+        "to": [
+            8000136,
+            8000137,
+            8000138,
+            8000139,
+            8000140,
+            8000141,
+            8000142,
+            8000143,
+            8000144,
+            8000145
+        ]
+    },
+    [...]
+]
+```
+
+### Performance
+
+The performance is also with very large trees considerably good. The recursiveness of
+fetching trees is handled by the database, thus pretty fast.
+To test the performance, populate the database with the `scripts/loadtest.sql`.
+This generates 100 trees with 99.900 nodes, each node having 10 connections.
+
+Then try the loadtest feature in postman with the "GetTree Random" script.
+The results on my laptop were pretty good, having steady response times.
+The test was made over the course of 10 minutes with 10 concurrent users.
+The average response time was around 12 seconds, the streaming method was
+slightly slower. 
+Smaller trees resulted in much better response times of course.
+Single requests are of course faster.
+
+The memory usage of the application was stable between 200MB and 300MB. The memory 
+usage of the application idling is about 150MB. The streaming method used
+constantly less memory during the performance test between 80MB and 120MB.
+
+The performance could be increased mainly by tuning the database, e.g. splitting
+the edge table into partitions or assigning more cpus to it.
+
+![Postman Performance run 1](doc/postman_gettree.png?raw=true)
+![Postman Performance run 2](doc/postman_gettreestream.png?raw=true)
+
+The postman collection for testing is contained in the folder `doc`.
 
 ## References
 
