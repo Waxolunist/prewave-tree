@@ -135,9 +135,13 @@ needed during runtime.
 
 ### Testing and Linting
 
-
+TODO 
 
 The hardest part I thought will be to avoid infinite queries because of possible cycles.
+
+### Response and request formats
+
+TODO swagger docs
 
 ## References
 

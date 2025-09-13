@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.prewave.sterzl.supplychain.model.EdgeDTO
 import com.prewave.sterzl.supplychain.service.EdgeService
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
@@ -23,8 +24,9 @@ class EdgeController {
 
     @PostMapping
     fun createEdge(
-        @RequestBody edge: EdgeDTO,
+        @Valid @RequestBody edge: EdgeDTO,
     ): EdgeDTO {
+        check(edge.from != edge.to) { "From and to shall not be identical" }
         val affectedRows = edgeService.createEdge(edge)
         if (affectedRows == 0) {
             throw EdgeExistsExceptions(edge)
