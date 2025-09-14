@@ -90,7 +90,7 @@ class EdgeControllerTest {
 
     @Test
     fun getTree() {
-        val edgeList = listOf(BranchDTO(1, arrayOf(2)), BranchDTO(2, arrayOf(3)))
+        val edgeList = listOf(BranchDTO(1, listOf(2)), BranchDTO(2, listOf(3)))
         `when`(edgeService.getTree(anyInt())).thenReturn(edgeList.stream())
         `when`(edgeService.existsNode(anyInt())).thenReturn(true)
         val result = edgeController.getTree(1)
@@ -112,7 +112,7 @@ class EdgeControllerTest {
 
     @Test
     fun getTreeStream() {
-        val edgeList = listOf(BranchDTO(1, arrayOf(2)), BranchDTO(2, arrayOf(3)))
+        val edgeList = listOf(BranchDTO(1, listOf(2)), BranchDTO(2, listOf(3)))
         `when`(edgeService.getTree(anyInt())).thenReturn(edgeList.stream())
         `when`(edgeService.existsNode(anyInt())).thenReturn(true)
         val result = edgeController.getTreeStream(1)

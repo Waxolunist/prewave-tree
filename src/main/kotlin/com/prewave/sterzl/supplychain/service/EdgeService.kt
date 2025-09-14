@@ -74,7 +74,7 @@ class EdgeService(
             .groupBy(subEdgesFromId)
             .fetchStream()
             .map {
-                BranchDTO(it.getValue(subEdgesFromId), it.getValue(arrayAggField))
+                BranchDTO(it.getValue(subEdgesFromId), it.getValue(arrayAggField).toList())
             }
     }
 }

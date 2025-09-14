@@ -1,6 +1,6 @@
 # How To Start
 
-## Prerequisits
+## Prerequisites
 
 ### Required
 
@@ -150,7 +150,7 @@ needed during runtime.
 ### Controller design
 
 The controller contains 2 different approaches to the response schema.
-One is a standard approach, which is in trees with over a million edges 
+One is a standard approach, which is
 slightly faster, the other is a streaming approch, which is faster in 
 the time to the first byte.
 
@@ -190,19 +190,19 @@ The response format is a list of Nodes. Each entry then contains a list of targe
 The performance is also with very large trees considerably good. The recursiveness of
 fetching trees is handled by the database, thus pretty fast.
 To test the performance, populate the database with the `scripts/loadtest.sql`.
-This generates 100 trees with 99.900 nodes, each node having 10 connections.
+This generates 100 trees with each 99.900 nodes, each node having 10 connections.
 
 Then try the loadtest feature in postman with the "GetTree Random" script.
 The results on my laptop were pretty good, having steady response times.
 The test was made over the course of 10 minutes with 10 concurrent users.
-The average response time was around 12 seconds, the streaming method was
-slightly slower. 
+The average response time was around 5 seconds, the streaming method was
+slightly slower (~ +2s). 
 Smaller trees resulted in much better response times of course.
 Single requests are of course faster.
 
-The memory usage of the application was stable between 200MB and 300MB. The memory 
-usage of the application idling is about 150MB. The streaming method used
-constantly less memory during the performance test between 80MB and 120MB.
+The memory usage of the application was stable between 300MB and 600MB. The memory 
+usage of the application idling is about 80MB. The streaming method used
+constantly less memory during the performance test between 100MB and 180MB.
 
 The performance could be increased mainly by tuning the database, e.g. splitting
 the edge table into partitions or assigning more cpus to it.
